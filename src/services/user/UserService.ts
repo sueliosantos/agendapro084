@@ -8,7 +8,7 @@ interface UserRequest {
   ativo: boolean;
 }
 
-class CreateUseService {
+class UseService {
   async execute({ nome, email, senha, ativo }: UserRequest) {
     if (!email) {
       throw new Error("Email incorreto");
@@ -46,4 +46,4 @@ class CreateUseService {
   }
 }
 
-export { CreateUseService };
+export { UseService };
