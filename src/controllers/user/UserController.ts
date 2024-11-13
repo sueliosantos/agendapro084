@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { UseService } from "../../services/user/UserService";
-
+import { Request, Response } from 'express';
+import { UseService } from '../../services/user/UserService';
+import { hash } from 'bcryptjs';
 
 class UserController {
   async handle(req: Request, res: Response) {
@@ -8,7 +8,9 @@ class UserController {
 
     const service = new UseService();
 
-    const user = await service.execute({ nome, email, senha, ativo });
+    const senhaHast = await hash(senha, 8);
+
+    const user = await service.execute({ nome, email, senha: senhaHast, ativo });
 
     return res.json(user);
   }
