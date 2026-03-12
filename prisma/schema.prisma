@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,14 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// criar uma migration: yarn prisma migrate dev.
+enum PlanoUsuario {
+  PLANO_1 @map("1")
+  PLANO_2 @map("2")
+  PLANO_3 @map("3")
+}
+
 model Usuario {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  nome     String
-  senha    String
-  ativo    Boolean @default(true)
-  cpf_cnpj String? @unique @db.VarChar(250)
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  nome         String
+  nomeSocial   String?       @map("nome_social")
+  senha        String
+  token        String?
+  palavraPasse String?       @map("palavra_passe")
+  ativo        Boolean       @default(true)
+  cpf          String?       @unique @map("cpf_cnpj") @db.VarChar(250)
+  telefone     String?
+  tipo         String        @default("USER")
+  linkFoto     String?       @map("link_foto")
+  validade     DateTime?
+  plano        PlanoUsuario?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("usuario")
 }
