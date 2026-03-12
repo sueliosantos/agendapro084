@@ -3,34 +3,111 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-enum PlanoUsuario {
-  PLANO_1 @map("1")
-  PLANO_2 @map("2")
-  PLANO_3 @map("3")
+enum TipoAtendimento {
+  PLANO
+  PARTICULAR
+}
+
+enum StatusAgenda {
+  AGENDADO
+  COMPARECEU
+  FALTOU
+  CANCELADO
+}
+
+enum StatusAssinatura {
+  ATIVO
+  INATIVO
+  CANCELADO
 }
 
 model Usuario {
-  id           Int           @id @default(autoincrement())
-  email        String        @unique
-  nome         String
-  nomeSocial   String?       @map("nome_social")
-  senha        String
-  token        String?
-  palavraPasse String?       @map("palavra_passe")
-  ativo        Boolean       @default(true)
-  cpf          String?       @unique @map("cpf_cnpj") @db.VarChar(250)
-  telefone     String?
-  tipo         String        @default("USER")
-  linkFoto     String?       @map("link_foto")
-  validade     DateTime?
-  plano        PlanoUsuario?
+  id                     Int          @id @default(autoincrement())
+  nome                   String
+  email                  String       @unique
+  senha                  String
+  resetPasswordToken     String?      @map("reset_password_token")
+  resetPasswordExpiresAt DateTime?    @map("reset_password_expires_at")
+  createdAt              DateTime     @default(now()) @map("created_at")
+  updatedAt              DateTime     @updatedAt @map("updated_at")
+  planosSaude            PlanoSaude[]
+  pacientes              Paciente[]
+  agendas                Agenda[]
+  assinaturas            Assinatura[]
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("usuarios")
+}
 
-  @@map("usuario")
+model PlanoSaude {
+  id                  Int       @id @default(autoincrement())
+  usuarioId           Int       @map("usuario_id")
+  nome                String
+  valorConsulta       Decimal   @map("valor_consulta") @db.Decimal(10, 2)
+  dataPagamento       DateTime  @map("data_pagamento")
+  percentualDesconto  Decimal?  @map("percentual_desconto") @db.Decimal(5, 2)
+  valorLiquido        Decimal?  @map("valor_liquido") @db.Decimal(10, 2)
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  usuario             Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  pacientes           Paciente[]
+
+  @@index([usuarioId])
+  @@map("planos_saude")
+}
+
+model Paciente {
+  id               Int              @id @default(autoincrement())
+  usuarioId        Int              @map("usuario_id")
+  nome             String
+  telefone         String
+  tipoAtendimento  TipoAtendimento  @map("tipo_atendimento")
+  planoSaudeId     Int?             @map("plano_saude_id")
+  valorParticular  Decimal?         @map("valor_particular") @db.Decimal(10, 2)
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  usuario          Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  planoSaude       PlanoSaude?      @relation(fields: [planoSaudeId], references: [id], onDelete: SetNull)
+  agendas          Agenda[]
+
+  @@index([usuarioId])
+  @@index([planoSaudeId])
+  @@map("pacientes")
+}
+
+model Agenda {
+  id             Int          @id @default(autoincrement())
+  usuarioId      Int          @map("usuario_id")
+  pacienteId     Int          @map("paciente_id")
+  data           DateTime
+  hora           String
+  status         StatusAgenda @default(AGENDADO)
+  valorConsulta  Decimal      @map("valor_consulta") @db.Decimal(10, 2)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  paciente       Paciente     @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, data])
+  @@index([pacienteId])
+  @@map("agendas")
+}
+
+model Assinatura {
+  id            Int               @id @default(autoincrement())
+  usuarioId     Int               @map("usuario_id")
+  status        StatusAssinatura  @default(ATIVO)
+  dataInicio    DateTime          @map("data_inicio")
+  dataExpiracao DateTime          @map("data_expiracao")
+  plano         String
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+  usuario       Usuario           @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, status])
+  @@map("assinaturas")
 }

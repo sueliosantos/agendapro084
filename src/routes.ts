@@ -1,18 +1,20 @@
 import { Router } from "express";
-import { AuthUserController } from "./controllers/user/AuthUserController";
-import { DetailUserController } from "./controllers/user/DetailUserController";
-import { isAuthenticated } from "./middlewares/isAuthenticated";
-import { isAdmin } from "./middlewares/isAdmin";
-import { UserController } from "./controllers/user/UserController";
+import { agendaRoutes } from "./routes/agendaRoutes";
+import { authRoutes } from "./routes/authRoutes";
+import { financeiroRoutes } from "./routes/financeiroRoutes";
+import { pacienteRoutes } from "./routes/pacienteRoutes";
+import { planoSaudeRoutes } from "./routes/planoSaudeRoutes";
+import { relatorioRoutes } from "./routes/relatorioRoutes";
+import { usuarioRoutes } from "./routes/usuarioRoutes";
 
-const router = Router();
+const routes = Router();
 
-router.post("/users", new UserController().handle);
-router.put("/users/me", isAuthenticated, new UserController().updateMe);
-router.patch("/users/:id/plano", isAuthenticated, isAdmin, new UserController().updatePlano);
-router.patch("/users/me/senha", isAuthenticated, new UserController().alterarSenha);
-router.get("/admin/users", isAuthenticated, isAdmin, new UserController().adminList);
-router.patch("/admin/users/:id", isAuthenticated, isAdmin, new UserController().adminUpdate);
-router.post("/session", new AuthUserController().handle);
-router.get("/me", isAuthenticated, new DetailUserController().handle);
-export { router };
+routes.use("/auth", authRoutes);
+routes.use("/usuario", usuarioRoutes);
+routes.use("/planos", planoSaudeRoutes);
+routes.use("/pacientes", pacienteRoutes);
+routes.use("/agenda", agendaRoutes);
+routes.use("/financeiro", financeiroRoutes);
+routes.use("/relatorios", relatorioRoutes);
+
+export { routes };

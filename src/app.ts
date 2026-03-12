@@ -1,27 +1,24 @@
-import express, { NextFunction, Request, Response } from "express";
+import "dotenv/config";
 import "express-async-errors";
 import cors from "cors";
-import { router } from "./routes";
+import express from "express";
+import { errorMiddleware } from "./middleware/errorMiddleware";
+import { routes } from "./routes";
 
 const app = express();
 
-app.use(express.json());
 app.use(cors());
-app.use(router);
-app.use("/api", router);
+app.use(express.json());
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  if (err instanceof Error) {
-    return res.status(400).json({
-      error: err.message,
-    });
-  }
-
-  return res.status(500).json({
-    status: "error",
-    message: "Internal server error.",
+app.get("/health", (_req, res) => {
+  return res.json({
+    success: true,
+    data: { status: "ok" },
+    message: "API online",
   });
 });
 
+app.use(routes);
+app.use(errorMiddleware);
+
 export { app };
-export default app;

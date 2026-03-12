@@ -1,13 +1,1 @@
-CREATE TYPE "PlanoUsuario" AS ENUM ('1', '2', '3');
-
-ALTER TABLE "usuario"
-ADD COLUMN "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN "link_foto" TEXT,
-ADD COLUMN "nome_social" TEXT,
-ADD COLUMN "palavra_passe" TEXT,
-ADD COLUMN "telefone" TEXT,
-ADD COLUMN "tipo" TEXT NOT NULL DEFAULT 'USER',
-ADD COLUMN "token" TEXT,
-ADD COLUMN "validade" TIMESTAMP(3),
-ADD COLUMN "plano" "PlanoUsuario";
+-- Superseded by 20260312134000_saas_medico.
